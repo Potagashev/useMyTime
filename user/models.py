@@ -20,4 +20,4 @@ class User(AbstractUser):
     photo = models.ImageField(blank=True, null=True, max_length=256, default=None)
 
     def __str__(self):
-        return self.username
+        return self.last_name, self.first_name

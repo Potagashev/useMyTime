@@ -9,8 +9,6 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-import ldap
-from django_auth_ldap.config import LDAPSearch
 
 from pathlib import Path
 
@@ -39,10 +37,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+
+    'django_python3_ldap',
 
     'user.apps.UserConfig',
-
-    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -89,11 +90,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test-usemytime',
+        'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'KNzMKoK2',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'PASSWORD': 'qwerty123',
+        'HOST': '127.0.0.1',
+        'PORT': '5433',
     }
 }
 
@@ -140,50 +141,110 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-AUTHENTICATION_BACKENDS = [
-    "django_auth_ldap.backend.LDAPBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
 
-AUTH_LDAP_SERVER_URI = "deimos.tec.local"
+AUTHENTICATION_BACKENDS = ("django_python3_ldap.auth.LDAPBackend",)
 
-AUTH_LDAP_BIND_DN = "CN=Потагашев Александр,OU=Students,OU=Npp2,DC=tec,DC=local"
-AUTH_LDAP_BIND_PASSWORD = "wu7*?PYx"
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    "OU=Npp2,DC=tec,DC=local", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
+# The URL of the LDAP server(s).  List multiple servers for high availability ServerPool connection.
+LDAP_AUTH_URL = ["ldap://Neptune.tec.local:389"]
 
-# AUTH_LDAP_REQUIRE_GROUP - если определено DN для этой настройки, то требуется присутсвие пользователя в этой группе
-# в противном случае пользовталю будет отказано в аутентификации
-# таким образом указываем, что для того чтобы пользователь был аутентифицирован он обязан находится в группе "active"
-# AUTH_LDAP_REQUIRE_GROUP = "cn=active,ou=Groups,ou=Django,dc=company,dc=ru"
+# Initiate TLS on connection.
+LDAP_AUTH_USE_TLS = False
 
-# AUTH_LDAP_DENY_GROUP - если определено DN для этой настройки, то в случае члентсва пользователя в этой группе
-# ему будет отказано в аутентификации
-# AUTH_LDAP_DENY_GROUP = "cn=disabled,ou=Groups,ou=Django,dc=company,dc=ru"
+# Specify which TLS version to use (Python 3.10 requires TLSv1 or higher)
+import ssl
+LDAP_AUTH_TLS_VERSION = ssl.PROTOCOL_TLSv1_2
 
-# Указываем как переносить данные из AD в стандартный профиль пользователя Django
-AUTH_LDAP_USER_ATTR_MAP = {
+# The LDAP search base for looking up users.
+LDAP_AUTH_SEARCH_BASE = "OU=Npp2,DC=tec,DC=local"
+
+# The LDAP class that represents a user.
+LDAP_AUTH_OBJECT_CLASS = "organizationalPerson"
+
+# User model fields mapped to the LDAP
+# attributes that represent them.
+LDAP_AUTH_USER_FIELDS = {
     "first_name": "givenName",
     "last_name": "sn",
     "email": "mail",
-    "username": "sAMAccountName",
-    "department": "department",
+    "username": "userPrincipalName", # it won't work with usual username
+    # "username": "sAMAccountName",
+    "department": "department", 
     "appointment": "title",
     "manager": "manager"
 }
 
-# # Указываем как переносить данные из AD в расширенный профиль пользователя Django
-# AUTH_LDAP_PROFILE_ATTR_MAP = {
-#     "employee_number": "employeeNumber"
+# A tuple of django model fields used to uniquely identify a user.
+LDAP_AUTH_USER_LOOKUP_FIELDS = ("username",)
+
+# Path to a callable that takes a dict of {model_field_name: value},
+# returning a dict of clean model data.
+# Use this to customize how data loaded from LDAP is saved to the User model.
+LDAP_AUTH_CLEAN_USER_DATA = "django_python3_ldap.utils.clean_user_data"
+
+# Path to a callable that takes a user model, a dict of {ldap_field_name: [value]}
+# a LDAP connection object (to allow further lookups), and saves any additional
+# user relationships based on the LDAP data.
+# Use this to customize how data loaded from LDAP is saved to User model relations.
+# For customizing non-related User model fields, use LDAP_AUTH_CLEAN_USER_DATA.
+LDAP_AUTH_SYNC_USER_RELATIONS = "django_python3_ldap.utils.sync_user_relations"
+
+# Path to a callable that takes a dict of {ldap_field_name: value},
+# returning a list of [ldap_search_filter]. The search filters will then be AND'd
+# together when creating the final search filter.
+LDAP_AUTH_FORMAT_SEARCH_FILTERS = "django_python3_ldap.utils.format_search_filters"
+
+# Path to a callable that takes a dict of {model_field_name: value}, and returns
+# a string of the username to bind to the LDAP server.
+# Use this to support different types of LDAP server.
+LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory_principal"
+
+
+# Sets the login domain for Active Directory users.
+LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = None
+
+
+# The LDAP username and password of a user for querying the LDAP database for user
+# details. If None, then the authenticated user will be used for querying, and
+# the `ldap_sync_users` command will perform an anonymous query.
+LDAP_AUTH_CONNECTION_USERNAME = "CN=Потагашев Александр,OU=Students,OU=Npp2,DC=tec,DC=local"
+LDAP_AUTH_CONNECTION_PASSWORD = "wu7*?PYx"
+
+# Set connection/receive timeouts (in seconds) on the underlying `ldap3` library.
+# LDAP_AUTH_CONNECT_TIMEOUT = 36000
+# LDAP_AUTH_RECEIVE_TIMEOUT = 36000
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#         },
+#     },
+#     "loggers": {
+#         "django_python3_ldap": {
+#             "handlers": ["console"],
+#             "level": "INFO",
+#         },
+#     },
 # }
 
-# This is the default, but I like to be explicit.
-AUTH_LDAP_ALWAYS_UPDATE_USER = True
+AUTH_USER_MODEL = 'user.User'
 
-# Use LDAP group membership to calculate group permissions.
-AUTH_LDAP_FIND_GROUP_PERMS = True
 
-# Cache group memberships for an hour to minimize LDAP traffic
-AUTH_LDAP_CACHE_GROUPS = True
-AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',  # show UI of API
+    ],
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20,
+}

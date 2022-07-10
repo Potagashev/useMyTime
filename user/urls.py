@@ -1,8 +1,7 @@
-from posixpath import basename
-from django.urls import path, include, re_path
+from django.urls import path, include
 
-import views
 
 urlpatterns = [
-    path('api/v1/users/', views.UserViewSet, basename='user'),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.authtoken')),
 ]

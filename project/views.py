@@ -1,3 +1,10 @@
-from django.shortcuts import render
+from rest_framework import generics
 
-# Create your views here.
+# projects/
+class ProjectListCreateAPIView(generics.ListCreateAPIView):
+    # queryset = Project.objects.filter(user in users)
+    pass
+
+# project/{id}
+class ProjectRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    pass
