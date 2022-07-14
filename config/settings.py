@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=(=k^&6dq_x64bs78^&haj22yna89_-bvtoo+7ev4%=-u1$x2g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['use-my-time-demo.herokuapp.com']
+ALLOWED_HOSTS = ['use-my-time-demo.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -242,9 +242,9 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',  # show UI of API
     ],
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
