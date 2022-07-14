@@ -16,7 +16,7 @@ class User(AbstractUser):
     email = models.EmailField(_("email address"), unique=True, blank=False, null=False)
     department = models.CharField(max_length=128, blank=False, null=False)
     appointment = models.CharField(max_length=128, blank=False, null=False)
-    manager = models.ForeignKey("self", on_delete=models.SET_NULL,  blank=False, null=True)
+    manager = models.ForeignKey("self", on_delete=models.SET_NULL, blank=False, null=True)
     photo = models.ImageField(blank=True, null=True, max_length=256, default=None)
 
     def __str__(self):

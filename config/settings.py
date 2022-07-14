@@ -40,10 +40,12 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'drf_yasg',
 
     'django_python3_ldap',
 
     'user.apps.UserConfig',
+    'project.apps.ProjectConfig',
 ]
 
 MIDDLEWARE = [
@@ -141,8 +143,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-
-AUTHENTICATION_BACKENDS = ("django_python3_ldap.auth.LDAPBackend",)
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "django_python3_ldap.auth.LDAPBackend",
+)
 
 # The URL of the LDAP server(s).  List multiple servers for high availability ServerPool connection.
 LDAP_AUTH_URL = ["ldap://Neptune.tec.local:389"]
@@ -168,7 +172,7 @@ LDAP_AUTH_USER_FIELDS = {
     "email": "mail",
     "username": "userPrincipalName", # it won't work with usual username
     # "username": "sAMAccountName",
-    "department": "department", 
+    "department": "department",
     "appointment": "title",
     "manager": "manager"
 }
@@ -242,8 +246,6 @@ REST_FRAMEWORK = {
     # ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 20,
