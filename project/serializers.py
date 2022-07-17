@@ -9,6 +9,12 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProjectSerializerWithoutDecription(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        exclude = ('description', )
+
+
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task

@@ -9,7 +9,6 @@ class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='project_creator')
     users = models.ManyToManyField(User)
     description = models.CharField(max_length=300, null=True, blank=True)
-    deadline = models.DateField()
     priority = models.IntegerField(
         default=6,
         validators=[
