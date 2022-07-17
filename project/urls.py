@@ -1,13 +1,14 @@
-from django.urls import path, include, re_path
+from django.urls import path, re_path
 
 from project import views
 
 urlpatterns = [
-    path('api/projects', views.ProjectListCreateAPIView.as_view()),
-    path('api/project/<int:pk>', views.ProjectRetrieveUpdateDestroyAPIView.as_view()),
+    path('api/projects_of_current_user/', views.ProjectListAPIView.as_view()),
+    path('api/create_project/', views.ProjectCreateViewSet.as_view({'post': 'create'})),
+    re_path('^api/project/(?P<id>.+)/$', views.ProjectRetrieveUpdateDestroyAPIView.as_view()),
 
-    path('api/tasks_of_project/<int:project_id>', views.TaskListAPIView.as_view()),
-    path('api/add_task_to_project', views.TaskCreateAPIView.as_view()),
-    path('api/task/<int:pk>', views.TaskRetrieveUpdateDestroyAPIView.as_view()),
-    re_path('^api/tasks_by_assignee/(?P<assignee__username>.+)/$', views.TasksByUserListAPIView.as_view()),
+    re_path('^api/tasks_of_project/(?P<project_id>.+)/$', views.TaskListAPIView.as_view()),
+    path('api/add_task_to_project/', views.TaskCreateAPIView.as_view()),
+    re_path('^api/task/(?P<id>.+)/$', views.TaskRetrieveUpdateDestroyAPIView.as_view()),
+    re_path('^api/tasks_by_assignee/(?P<assignee__id>.+)/$', views.TasksByUserListAPIView.as_view()),
 ]

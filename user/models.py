@@ -10,6 +10,8 @@ class User(AbstractUser):
         'last_name',
         'email',
         'department',
+        'appointment',
+        'manager'
     ]
     first_name = models.CharField(_("first name"), max_length=150, blank=False, null=False)
     last_name = models.CharField(_("last name"), max_length=150, blank=False, null=False)
@@ -18,6 +20,6 @@ class User(AbstractUser):
     appointment = models.CharField(max_length=128, blank=False, null=False)
     manager = models.ForeignKey("self", on_delete=models.SET_NULL, blank=False, null=True)
     photo = models.ImageField(blank=True, null=True, max_length=256, default=None)
-
-    def __str__(self):
-        return self.last_name, self.first_name
+    #
+    # def __str__(self):
+    #     return self.last_name, self.first_name

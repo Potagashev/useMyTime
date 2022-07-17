@@ -5,7 +5,8 @@ from user.models import User
 
 
 class Project(models.Model):
-    name = models.CharField(max_length=30, unique=True, null=False)
+    name = models.CharField(max_length=30, null=False)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='project_creator')
     users = models.ManyToManyField(User)
     description = models.CharField(max_length=300, null=True, blank=True)
     deadline = models.DateField()
