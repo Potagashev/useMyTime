@@ -6,8 +6,8 @@ from .yasg import urlpatterns as doc_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user.urls')),
-    path('', include('project.urls')),
-    path('', include('project_properties.urls')),
+    path('api/project/', include('project.urls')),
+    path('api/project_properties/', include('project_properties.urls')),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
