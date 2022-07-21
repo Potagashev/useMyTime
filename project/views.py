@@ -1,15 +1,16 @@
 import json
 
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from project.models import Project, Task
+from project.models import Project, Task, Order
 from project.permissions import ReadOnly, IsProjectMember, IsProjectOwner, IsProjectMemberForTasks, \
     IsProjectOwnerForTasks, IsTaskAssignee, IsUsersManager, IsHimself
 from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerializerWithoutDecription
 from project.utils import validate_members, create_task
+from project_properties.models import ProjectType, DirectionType
 
 
 class ProjectListAPIView(generics.ListAPIView):
@@ -20,6 +21,7 @@ class ProjectListAPIView(generics.ListAPIView):
 
 
 class ProjectCreateViewSet(viewsets.ViewSet):
+    @swagger_auto_schema(request_body=ProjectSerializer, operation_description='в order передаешь наименование заказа')
     def create(self, request):
         data = json.loads(request.body)
         members = data['users']
@@ -30,7 +32,12 @@ class ProjectCreateViewSet(viewsets.ViewSet):
             name=data['name'],
             owner=request.user,
             description=data['description'],
-            deadline=data['deadline'],
+            start_date=data['start_date'],
+            end_date=data['end_date'],
+            order=Order.objects.get_or_create(id=data['order'])[0],
+            type=ProjectType.objects.get(id=data['type']),
+            direction_type=DirectionType.objects.get(id=data['direction_type']),
+
             priority=data['priority'],
         )
         project.users.set(validated_members)
@@ -60,8 +67,10 @@ class TaskListAPIView(generics.ListAPIView):
 
 # создание таски к проекту
 class TaskCreateAPIView(APIView):
+
     # todo
     # отрефакторить, дописать permission classes
+    @swagger_auto_schema(request_body=TaskSerializer)
     def post(self, request):
         """получаем данные с запроса, проверяем участие юзера в проекте,
         если нет - 403

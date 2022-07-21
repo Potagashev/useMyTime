@@ -55,6 +55,7 @@ INSTALLED_APPS = [
 
     'user.apps.UserConfig',
     'project.apps.ProjectConfig',
+    'project_properties.apps.ProjectPropertiesConfig',
 ]
 
 MIDDLEWARE = [
@@ -171,7 +172,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
-    "django_python3_ldap.auth.LDAPBackend",
+    # "django_python3_ldap.auth.LDAPBackend",
 )
 
 # The URL of the LDAP server(s).  List multiple servers for high availability ServerPool connection.
@@ -239,9 +240,9 @@ LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = None
 LDAP_AUTH_CONNECTION_USERNAME = "CN=Потагашев Александр,OU=Students,OU=Npp2,DC=tec,DC=local"
 LDAP_AUTH_CONNECTION_PASSWORD = "wu7*?PYx"
 
-# Set connection/receive timeouts (in seconds) on the underlying `ldap3` library.
-# LDAP_AUTH_CONNECT_TIMEOUT = 36000
-# LDAP_AUTH_RECEIVE_TIMEOUT = 36000
+# # Set connection/receive timeouts (in seconds) on the underlying `ldap3` library.
+# LDAP_AUTH_CONNECT_TIMEOUT = 20
+# LDAP_AUTH_RECEIVE_TIMEOUT = 25
 
 # LOGGING = {
 #     "version": 1,

@@ -1,7 +1,12 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from project_properties.models import ProjectType, DirectionType
 from user.models import User
+
+
+class Order(models.Model):
+    title = models.CharField(max_length=30, unique=True)
 
 
 class Project(models.Model):
@@ -9,6 +14,12 @@ class Project(models.Model):
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='project_creator')
     users = models.ManyToManyField(User)
     description = models.CharField(max_length=300, null=True, blank=True)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, null=True)
+    direction_type = models.ForeignKey(DirectionType, on_delete=models.SET_NULL, null=True)
+
     priority = models.IntegerField(
         default=6,
         validators=[
@@ -30,3 +41,5 @@ class Task(models.Model):
 
     def __str__(self):
         return self.name
+
+
