@@ -8,13 +8,13 @@ from rest_framework.views import APIView
 from project.models import Project, Task, Order
 from project.permissions import ReadOnly, IsProjectMember, IsProjectOwner, IsProjectMemberForTasks, \
     IsProjectOwnerForTasks, IsTaskAssignee, IsUsersManager, IsHimself
-from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerializerWithoutDecription
+from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerializerWithoutDescription
 from project.utils import validate_members, create_task
 from project_properties.models import ProjectType, DirectionType
 
 
 class ProjectListAPIView(generics.ListAPIView):
-    serializer_class = ProjectSerializerWithoutDecription
+    serializer_class = ProjectSerializerWithoutDescription
 
     def get_queryset(self):
         return Project.objects.filter(users__id=self.request.user.id)
