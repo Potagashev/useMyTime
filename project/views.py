@@ -3,6 +3,7 @@ import json
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
+from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -64,7 +65,6 @@ class TaskListAPIView(generics.ListAPIView):
 
 # создание таски к проекту
 class TaskCreateAPIView(APIView):
-
     # todo
     # отрефакторить, дописать permission classes
     @swagger_auto_schema(request_body=TaskSerializer)

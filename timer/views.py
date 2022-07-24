@@ -69,18 +69,19 @@ class TimerInfoByProjectForTodayAPIView(APIView):
             start_time__gte=datetime(*datetime.now().timetuple()[:3]),  # round to date
             end_time__lte=datetime.now()
         ).order_by('start_time')
+
+        print()
+
         if sessions:
             start = sessions[0].start_time
-            if sessions[-1].end_time is not None:  # если неактивен
-                result = sessions[-1].end_time - start
+            last_session = TaskTimer.objects.latest('start_time')
+            if last_session.end_time is not None:  # если неактивен
+                result = last_session.end_time - start
             else:  # активен
                 result = datetime.now() - start  # если активен
             return Response({'total time by project for today': result})
         else:
-            Response({'details': 'there is no projects you worked at today'})
-        serializer = TaskTimerSerializerForStarting(sessions)
-        response = serializer.data
-        return Response(response)
+            return Response({'details': 'there are no tasks you worked at this project today'})
 
 
 # class TotalTimeByProjectAPIView(APIView):
