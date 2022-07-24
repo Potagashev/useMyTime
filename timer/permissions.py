@@ -16,4 +16,4 @@ class IsAssigneeForTimer(permissions.BasePermission):
 
 class IsProjectMemberForTimer(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user in Project.objects.get(id=view.kwargs['project_id']).users.all()
+        return request.user in Project.objects.get(id=view.kwargs['pk']).users.all()

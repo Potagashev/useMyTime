@@ -8,5 +8,9 @@ urlpatterns = [
 
     path('timer_info_by_task/', views.TimerInfoByTaskAPIView.as_view()),
     path('timer_info_by_project_for_today/<int:pk>/', views.TimerInfoByProjectForTodayAPIView.as_view()),
-    path('total_time_by_project/<int:project_id>/', views.TotalTimeByProjectAPIView.as_view())
+    path('total_time_by_project/<int:pk>/', views.TotalTimeByProjectAPIView.as_view()),
+    path('total_time_by_task/<int:pk>/', views.TotalTimeByTaskAPIView.as_view()),
+
+    path('sessions_by_project/<int:pk>/', views.SessionsByProjectAPIView.as_view()),
+    path('sessions_by_task/<int:pk>/', views.SessionsByTaskAPIView.as_view()),
 ]

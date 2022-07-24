@@ -61,7 +61,7 @@ class TimerInfoByTaskAPIView(APIView):
 
 class TimerInfoByProjectForTodayAPIView(APIView):
     """returns info about how much time spent on project today - summing time of all tasks"""
-    permission_classes = [IsProjectMemberForTimer]
+    permission_classes = [IsProjectMemberForTimer & IsAuthenticated]
 
     def get(self, request, pk):
         sessions = TaskTimer.objects.filter(
@@ -88,8 +88,8 @@ class TotalTimeByProjectAPIView(APIView):
     """returns how much time was spent on this project"""
     permission_classes = [IsProjectMemberForTimer & IsAuthenticated]
 
-    def get(self, request, project_id):
-        sessions = TaskTimer.objects.filter(task__project__id=project_id).order_by('start_time')
+    def get(self, request, pk):
+        sessions = TaskTimer.objects.filter(task__project__id=pk).order_by('start_time')
         if sessions:
             start = sessions[0].start_time
             last_session = TaskTimer.objects.latest('start_time')
@@ -102,38 +102,39 @@ class TotalTimeByProjectAPIView(APIView):
             return Response({'Details': 'There are no tasks registered by the system!'}, status=404)
 
 
-#
-# class TotalTimeByTaskAPIView(APIView):
-#     permission_classes = [IsAssigneeForTimer]
-#
-#     def get(self, request):
-#         # если активная задача, то должны отнять от сейчас начало
-#         # если неактивная, то отнять от последней первую
-#         sessions = TaskTimer.objects.filter(task__id=self.kwargs['task_id']).order_by('start_time')
-#         if sessions:
-#             start = sessions[0].start_time
-#             if sessions[-1].end_time is not None:
-#                 result = sessions[-1].end_time - start
-#             else:
-#                 result = datetime.now() - start
-#             return Response({'total time': result})
-#         else:
-#             return Response({'Details': 'There are no tasks registered by the system!'}, status=404)
-#
-#
-# class SessionsByProjectAPIView(APIView):
-#     permission_classes = [IsProjectMemberForTimer]
-#
-#     def get(self, request):
-#         sessions = TaskTimer.objects.filter(task__project__id=self.kwargs['project_id']).order_by('start_time')
-#         serializer = TaskTimerSerializer(sessions)
-#         return Response(serializer.data)
-#
-#
-# class SessionsByTaskAPIView(APIView):
-#     permission_classes = [IsAssigneeForTimer]
-#
-#     def get(self, request):
-#         sessions = TaskTimer.objects.filter(task__id=self.kwargs['task_id']).order_by('start_time')
-#         serializer = TaskTimerSerializer(sessions)
-#         return Response(serializer.data)
+class TotalTimeByTaskAPIView(APIView):
+    """returns how much time was spent on this task"""
+    permission_classes = [IsAssigneeForTimer & IsAuthenticated]
+
+    def get(self, request, pk):
+        # если активная задача, то должны отнять от сейчас начало
+        # если неактивная, то отнять от последней первую
+        sessions = TaskTimer.objects.filter(task__id=pk).order_by('start_time')
+        if sessions:
+            start = sessions[0].start_time
+            last_session = TaskTimer.objects.latest('pk')
+            if last_session.end_time is not None:  # если неактивен
+                result = last_session.end_time - start
+            else:
+                result = datetime.now() - start  # если активен
+            return Response({'total time by task': result})
+        else:
+            return Response({'Details': 'There are no tasks registered by the system!'}, status=404)
+
+
+class SessionsByProjectAPIView(APIView):
+    permission_classes = [IsProjectMemberForTimer & IsAuthenticated]
+
+    def get(self, request, pk):
+        sessions = TaskTimer.objects.filter(task__project__id=pk).order_by('start_time')
+        serializer = TaskTimerSerializer(sessions, many=True)
+        return Response(serializer.data)
+
+
+class SessionsByTaskAPIView(APIView):
+    permission_classes = [IsAssigneeForTimer & IsAuthenticated]
+
+    def get(self, request, pk):
+        sessions = TaskTimer.objects.filter(task__id=pk).order_by('start_time')
+        serializer = TaskTimerSerializer(sessions, many=True)
+        return Response(serializer.data)
