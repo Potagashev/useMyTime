@@ -1,7 +1,10 @@
+import io
 import json
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
+from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -23,26 +26,20 @@ class ProjectListAPIView(generics.ListAPIView):
 class ProjectCreateViewSet(viewsets.ViewSet):
     @swagger_auto_schema(request_body=ProjectSerializer, operation_description='в order передаешь наименование заказа')
     def create(self, request):
-        data = json.loads(request.body)
+
+        stream = io.BytesIO(request.body)
+        data = JSONParser().parse(stream)
+
         members = data['users']
         validated_members = validate_members(user_id=request.user.id, members=members)
         validated_members.append(request.user.id)
 
-        project = Project.objects.create(
-            name=data['name'],
-            owner=request.user,
-            description=data['description'],
-            start_date=data['start_date'],
-            end_date=data['end_date'],
-            order=Order.objects.get_or_create(id=data['order'])[0],
-            type=ProjectType.objects.get(id=data['type']),
-            direction_type=DirectionType.objects.get(id=data['direction_type']),
+        data['users'] = validated_members
 
-            priority=data['priority'],
-        )
-        project.users.set(validated_members)
-        project.save()
-        serializer = ProjectSerializer(project)
+        serializer = ProjectSerializer(data=data)
+        serializer.is_valid()
+        serializer.save()
+
         return Response(serializer.data)
 
 

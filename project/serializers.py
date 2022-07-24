@@ -4,22 +4,18 @@ from project.models import Project, Task
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    order_title = serializers.CharField(max_length=30)
 
     class Meta:
         model = Project
-        fields = (
-            'name',
-            'owner',
-            'users',
-            'description',
-            'start_date',
-            'end_date',
-            'order_title',
-            'type',
-            'direction_type',
-            'priority',
-        )
+        fields = '__all__'
+
+    def create(self, validated_data):
+        users = validated_data.pop('users')
+        project = Project.objects.create(**validated_data)
+        project.users.set([user.id for user in users])
+        print('ddfdfdf')
+        project.save()
+        return project
 
 
 class ProjectSerializerWithoutDescription(serializers.ModelSerializer):

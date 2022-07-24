@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'project.apps.ProjectConfig',
     'project_properties.apps.ProjectPropertiesConfig',
+    'timer.apps.TimerConfig',
 ]
 
 MIDDLEWARE = [
@@ -269,8 +270,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',  # show UI of API
     ],
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-        # 'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',

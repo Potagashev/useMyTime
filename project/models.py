@@ -16,9 +16,9 @@ class Project(models.Model):
     description = models.CharField(max_length=300, null=True, blank=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
-    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
-    type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, null=True)
-    direction_type = models.ForeignKey(DirectionType, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, blank=True, null=True)
+    type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, blank=True, null=True)
+    direction_type = models.ForeignKey(DirectionType, on_delete=models.SET_NULL, blank=True, null=True)
 
     priority = models.IntegerField(
         default=6,
