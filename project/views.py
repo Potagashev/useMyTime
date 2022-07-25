@@ -21,7 +21,11 @@ class ProjectListAPIView(generics.ListAPIView):
     serializer_class = ProjectSerializerWithoutDescription
 
     def get_queryset(self):
-        return Project.objects.filter(users__id=self.request.user.id)
+        param = self.request.query_params.get('filter_by')
+        if param:
+            return Project.objects.filter(users__id=self.request.user.id).order_by(param)
+        else:
+            return Project.objects.filter(users__id=self.request.user.id)
 
 
 class ProjectCreateViewSet(viewsets.ViewSet):
@@ -56,6 +60,10 @@ class ProjectRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
 # список таск по проекту
 class TaskListAPIView(generics.ListAPIView):
+    """
+    filtering can be priority, name, start_time, end_time, order, type, direction_type
+    REQUIRED REQUEST FORMAT: filter_projects/?filter_by=<field>
+    """
     permission_classes = [IsProjectMemberForTasks]
     serializer_class = TaskSerializer
     lookup_field = 'project_id'
