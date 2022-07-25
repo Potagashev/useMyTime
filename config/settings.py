@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'project.apps.ProjectConfig',
     'project_properties.apps.ProjectPropertiesConfig',
     'timer.apps.TimerConfig',
+    'filter.apps.FilterConfig',
 ]
 
 MIDDLEWARE = [
