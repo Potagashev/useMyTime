@@ -69,9 +69,6 @@ class TimerInfoByProjectForTodayAPIView(APIView):
             start_time__gte=datetime(*datetime.now().timetuple()[:3]),  # round to date
             end_time__lte=datetime.now()
         ).order_by('start_time')
-
-        print()
-
         if sessions:
             start = sessions[0].start_time
             last_session = TaskTimer.objects.latest('start_time')
