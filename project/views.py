@@ -25,7 +25,7 @@ class ProjectListAPIView(generics.ListAPIView):
 
 
 class ProjectCreateViewSet(viewsets.ViewSet):
-    @swagger_auto_schema(request_body=ProjectSerializer, operation_description='в order передаешь наименование заказа')
+    @swagger_auto_schema(request_body=ProjectSerializer)
     def create(self, request):
 
         stream = io.BytesIO(request.body)
@@ -36,6 +36,7 @@ class ProjectCreateViewSet(viewsets.ViewSet):
         validated_members.append(request.user.id)
 
         data['users'] = validated_members
+        data['owner'] = request.user.id
 
         serializer = ProjectSerializer(data=data)
         serializer.is_valid()

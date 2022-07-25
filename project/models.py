@@ -10,6 +10,10 @@ class Order(models.Model):
 
 
 class Project(models.Model):
+    # REQUIRED_FIELDS = [
+    #     'name',
+    #
+    # ]
     name = models.CharField(max_length=30, null=False)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='project_creator')
     users = models.ManyToManyField(User)

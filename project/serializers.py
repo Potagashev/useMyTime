@@ -13,7 +13,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         users = validated_data.pop('users')
         project = Project.objects.create(**validated_data)
         project.users.set([user.id for user in users])
-        print('ddfdfdf')
         project.save()
         return project
 
