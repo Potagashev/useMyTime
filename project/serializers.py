@@ -4,7 +4,6 @@ from project.models import Project, Task
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Project
         fields = '__all__'

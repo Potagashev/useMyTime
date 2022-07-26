@@ -1,9 +1,7 @@
-import io
 import json
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
-from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -11,7 +9,7 @@ from project.models import Project, Task
 from project.permissions import ReadOnly, IsProjectMember, IsProjectOwner, IsProjectMemberForTasks, \
     IsProjectOwnerForTasks, IsTaskAssignee, IsUsersManager, IsHimself
 from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerializerWithoutDescription
-from project.utils import validate_members, create_task
+from project.utils import create_task, validate_data_for_project_creating
 
 
 class ProjectListAPIView(generics.ListAPIView):
@@ -30,18 +28,14 @@ class ProjectListAPIView(generics.ListAPIView):
 
 
 class ProjectCreateViewSet(viewsets.ViewSet):
-    @swagger_auto_schema(request_body=ProjectSerializer)
+    @swagger_auto_schema(
+        request_body=ProjectSerializer,
+        operation_description="<h2>You don't have to provide OWNER</h2>"
+                              "<h2>In ORDER field instead of integer you <u>must</u> provide STRING as <u>title</u> "
+                              "of order!</h2> "
+    )
     def create(self, request):
-
-        stream = io.BytesIO(request.body)
-        data = JSONParser().parse(stream)
-
-        members = data['users']
-        validated_members = validate_members(user_id=request.user.id, members=members)
-        validated_members.append(request.user.id)
-
-        data['users'] = validated_members
-        data['owner'] = request.user.id
+        data = validate_data_for_project_creating(request)
 
         serializer = ProjectSerializer(data=data)
         serializer.is_valid()

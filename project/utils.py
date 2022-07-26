@@ -1,7 +1,13 @@
+import io
 import json
 
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
+
+from project.constants import MIN_PRIORITY, MAX_PRIORITY
 from project.models import Task, Project
+from project_properties.models import Order
+from project_properties.utils import is_order_exists
 from user.models import User
 
 
@@ -38,3 +44,41 @@ def create_task(request) -> Task:
         deadline=data['deadline']
     )
     return task
+
+
+def validate_data_for_project_creating(request):
+    stream = io.BytesIO(request.body)
+    data = JSONParser().parse(stream)
+
+    try:
+        priority = data['priority']
+        if priority < MIN_PRIORITY or priority > MAX_PRIORITY:
+            return Response({'details': f'priority should be >={MIN_PRIORITY} or <={MAX_PRIORITY}'})
+    except KeyError:
+        pass
+
+    try:
+        members = data['users']
+    except KeyError:
+        members = []
+    validated_members = validate_members(user_id=request.user.id, members=members)
+    validated_members.append(request.user.id)
+
+    try:
+        # достали строку, проверили, существует ли с таким тайтлом заказ
+        # если нет, создаем новый заказ, достаем его айди, и подменяем в запросе строку
+        # на этот айди
+        order_title = data['order']
+        if not is_order_exists(order_title):
+            order = Order()
+            order.title = order_title
+            order.save()
+        data['order'] = Order.objects.get(title=order_title).id
+
+    except KeyError:
+        data['order'] = None
+
+    data['users'] = validated_members
+    data['owner'] = request.user.id
+
+    return data
