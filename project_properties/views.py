@@ -1,8 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
-from project_properties.models import DirectionType, ProjectType
-from project_properties.serializers import DirectionTypeSerializer, ProjectTypeSerializer
+from project_properties.models import DirectionType, ProjectType, Order
+from project_properties.serializers import DirectionTypeSerializer, ProjectTypeSerializer, OrderSerializer
 
 
 class DirectionTypesListCreateAPIView(generics.ListCreateAPIView):
@@ -31,3 +31,9 @@ class ProjectTypeRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIV
     serializer_class = ProjectTypeSerializer
     queryset = ProjectType.objects.all()
     permission_classes = [IsAdminUser]
+
+
+class OrdersListCreateAPIView(generics.ListAPIView):
+    """list orders"""
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()

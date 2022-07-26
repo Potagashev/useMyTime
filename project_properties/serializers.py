@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from project_properties.models import DirectionType, ProjectType
+from project_properties.models import DirectionType, ProjectType, Order
 
 
 class DirectionTypeSerializer(serializers.ModelSerializer):
@@ -12,4 +12,10 @@ class DirectionTypeSerializer(serializers.ModelSerializer):
 class ProjectTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectType
+        fields = '__all__'
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
         fields = '__all__'
