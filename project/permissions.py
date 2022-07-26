@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 from rest_framework.permissions import SAFE_METHODS
 
+from project.models import Project
 from user.models import User
 
 
@@ -42,9 +43,12 @@ class ReadOnly(permissions.BasePermission):
 
 class IsProjectMember(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        return request.user in view.get_queryset()[0].users.all()
+        return request.user in Project.objects.get(id=view.kwargs.get('id')).users.all()
 
 
 class IsProjectMemberForTasks(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user in view.get_queryset()[0].project.users.all()
+        return request.user in Project.objects.get(id=view.kwargs.get('project_id')).users.all()
+
+    def has_object_permission(self, request, view, obj):
+        return request.user in obj.project.users.all()
