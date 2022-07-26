@@ -31,8 +31,7 @@ class ProjectCreateViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         request_body=ProjectSerializer,
         operation_description="<h2>You don't have to provide OWNER</h2>"
-                              "<h2>In ORDER field instead of integer you <u>must</u> provide STRING as <u>title</u> "
-                              "of order!</h2> "
+                              "<h2>In ORDER field you should provide string as <u>name</u> of order</h2>"
     )
     def create(self, request):
         data = validate_data_for_project_creating(request)
