@@ -3,21 +3,22 @@ import json
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
-from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import JSONParser
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from project.models import Project, Task, Order
+from project.models import Project, Task
 from project.permissions import ReadOnly, IsProjectMember, IsProjectOwner, IsProjectMemberForTasks, \
     IsProjectOwnerForTasks, IsTaskAssignee, IsUsersManager, IsHimself
 from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerializerWithoutDescription
 from project.utils import validate_members, create_task
-from project_properties.models import ProjectType, DirectionType
 
 
 class ProjectListAPIView(generics.ListAPIView):
+    """
+    <h3>filtering can be priority, name, start_time, end_time, order, type, direction_type
+    REQUIRED REQUEST FORMAT: project/projects_of_current_user/?filter_by={field}</h3>
+    """
     serializer_class = ProjectSerializerWithoutDescription
 
     def get_queryset(self):
@@ -60,10 +61,6 @@ class ProjectRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
 # список таск по проекту
 class TaskListAPIView(generics.ListAPIView):
-    """
-    filtering can be priority, name, start_time, end_time, order, type, direction_type
-    REQUIRED REQUEST FORMAT: filter_projects/?filter_by=<field>
-    """
     permission_classes = [IsProjectMemberForTasks]
     serializer_class = TaskSerializer
     lookup_field = 'project_id'
