@@ -6,8 +6,6 @@ from rest_framework.response import Response
 
 from project.constants import MIN_PRIORITY, MAX_PRIORITY
 from project.models import Task, Project
-from project_properties.models import Order
-from project_properties.utils import is_order_exists
 from user.models import User
 
 
@@ -63,20 +61,6 @@ def validate_data_for_project_creating(request):
         members = []
     validated_members = validate_members(user_id=request.user.id, members=members)
     validated_members.append(request.user.id)
-
-    try:
-        # достали строку, проверили, существует ли с таким тайтлом заказ
-        # если нет, создаем новый заказ, достаем его айди, и подменяем в запросе строку
-        # на этот айди
-        order_title = data['order']
-        if not is_order_exists(order_title):
-            order = Order()
-            order.title = order_title
-            order.save()
-        data['order'] = Order.objects.get(title=order_title).id
-
-    except KeyError:
-        data['order'] = None
 
     data['users'] = validated_members
     data['owner'] = request.user.id

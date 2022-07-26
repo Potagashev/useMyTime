@@ -9,7 +9,3 @@ class DirectionType(models.Model):
 class ProjectType(models.Model):
     abbreviation = models.CharField(max_length=20)
     explanation = models.CharField(max_length=100)
-
-
-class Order(models.Model):
-    title = models.CharField(max_length=30, unique=True)
