@@ -8,6 +8,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
+            'is_staff',
             'username',
             'first_name',
             'last_name',
@@ -22,3 +23,9 @@ class PreviewCustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'displayName']
+
+
+class CustomUserStaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'displayName', 'is_staff']

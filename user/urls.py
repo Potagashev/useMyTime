@@ -8,4 +8,5 @@ urlpatterns = [
 
     path('user/employees_of_current_user/', views.EmployeesListAPIView.as_view()),
     path('user/preview_users_by_ids/', views.EmployeesPreviewByIDsAPIView.as_view()),
+    path('user/make_user_admin/<int:pk>/', views.MakeUserAdminAPIView.as_view()),
 ]

@@ -17,17 +17,21 @@ from timer.utils import is_timer_active
 class StartTaskTimerAPIView(APIView):
     permission_classes = [IsAuthenticated & IsAssigneeForTimer]
 
-    @swagger_auto_schema(request_body=TaskTimerSerializerForStarting)
-    def post(self, request, pk):
-        if not Task.objects.filter(id=self.kwargs['pk']).exists():
-            raise Http404
-        if is_timer_active(request=request):
-            return TIMER_IS_ALREADY_ACTIVE_RESPONSE
-        else:
-            session = TaskTimer(task=Task.objects.get(id=pk))
-            session.save()
-            serializer = TaskTimerSerializerForStarting(session)
-            return Response(serializer.data)
+    @swagger_auto_schema(request_body=TaskTimerSerializerForStarting,
+                         operation_description='you can provide parameter "task_id" to set task to timer,'
+                                               'or you can leave it null')
+    def post(self, request):
+        task_id = self.request.query_params.get('task_id')
+        if task_id:
+            if not Task.objects.filter(id=task_id).exists():
+                raise Http404
+            if is_timer_active(request=request):
+                return TIMER_IS_ALREADY_ACTIVE_RESPONSE
+            else:
+                session = TaskTimer(task=Task.objects.get(id=pk))
+                session.save()
+                serializer = TaskTimerSerializerForStarting(session)
+                return Response(serializer.data)
 
 
 class StopTaskTimerAPIView(APIView):
