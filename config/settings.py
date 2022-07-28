@@ -276,3 +276,11 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'PAGE_SIZE': 20,
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'alexpotagashev@gmail.com'
+EMAIL_HOST_PASSWORD = 'qlfbxacwfbbzzcmz'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
