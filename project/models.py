@@ -38,6 +38,7 @@ class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     assignee = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     deadline = models.DateTimeField(null=True)
+    fulfilled = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

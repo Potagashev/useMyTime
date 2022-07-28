@@ -16,3 +16,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'appointment',
             'manager',
         ]
+
+
+class PreviewCustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'displayName']

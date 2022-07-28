@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import os
 from pathlib import Path
 
+import ssl
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -27,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['use-my-time-demo.herokuapp.com', 'localhost', '127.0.0.1']
 
-CORS_ALLOW_ALL_ORIGINS = True # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
+CORS_ALLOW_ALL_ORIGINS = True  # If this is used then `CORS_ALLOWED_ORIGINS` will not have any effect
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGIN_REGEXES = [
     'http://localhost:3000',
@@ -95,7 +96,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -128,7 +128,6 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -147,7 +146,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -159,7 +157,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -170,7 +167,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
@@ -184,7 +180,7 @@ LDAP_AUTH_URL = ["ldap://Neptune.tec.local:389"]
 LDAP_AUTH_USE_TLS = False
 
 # Specify which TLS version to use (Python 3.10 requires TLSv1 or higher)
-import ssl
+
 LDAP_AUTH_TLS_VERSION = ssl.PROTOCOL_TLSv1_2
 
 # The LDAP search base for looking up users.
@@ -196,10 +192,11 @@ LDAP_AUTH_OBJECT_CLASS = "organizationalPerson"
 # User model fields mapped to the LDAP
 # attributes that represent them.
 LDAP_AUTH_USER_FIELDS = {
+    "displayName": "displayName",
     "first_name": "givenName",
     "last_name": "sn",
     "email": "mail",
-    "username": "userPrincipalName", # it won't work with usual username
+    "username": "userPrincipalName",  # it won't work with usual username
     # "username": "sAMAccountName",
     "department": "department",
     "appointment": "title",
@@ -231,10 +228,8 @@ LDAP_AUTH_FORMAT_SEARCH_FILTERS = "django_python3_ldap.utils.format_search_filte
 # Use this to support different types of LDAP server.
 LDAP_AUTH_FORMAT_USERNAME = "django_python3_ldap.utils.format_username_active_directory_principal"
 
-
 # Sets the login domain for Active Directory users.
 LDAP_AUTH_ACTIVE_DIRECTORY_DOMAIN = None
-
 
 # The LDAP username and password of a user for querying the LDAP database for user
 # details. If None, then the authenticated user will be used for querying, and
@@ -263,7 +258,6 @@ LDAP_AUTH_CONNECTION_PASSWORD = "wu7*?PYx"
 # }
 
 AUTH_USER_MODEL = 'user.User'
-
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
