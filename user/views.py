@@ -1,5 +1,6 @@
 from django.core.mail import send_mail
 from django.http import Http404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
@@ -27,6 +28,8 @@ class EmployeesPreviewByIDsAPIView(generics.ListAPIView):
 class MakeUserAdminAPIView(APIView):
     permission_classes = [IsAdminUser, IsAuthenticated]
 
+    @swagger_auto_schema(operation_description='<h2>this request needs only ID\n'
+                                               'Response: 200 - id, displayName, is_staff</h2>')
     def patch(self, request, pk):
         try:
             user = User.objects.get(id=pk)
@@ -39,6 +42,9 @@ class MakeUserAdminAPIView(APIView):
 
 
 class SendEmailToDevelopersAPIView(APIView):
+    @swagger_auto_schema(operation_description='<h2>Request: {"message": "{your_message}"}\n'
+                                               'Response: \n200 - {"details": "the email has been sent"}\n'
+                                               '418 - {"details": "something went wrong!"}</h2>')
     def post(self, request):
         subject = constants.SUBJECT
         message_header = f"От кого: {self.request.user.displayName}\n" \
