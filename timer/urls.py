@@ -13,4 +13,6 @@ urlpatterns = [
 
     path('sessions_by_project/<int:pk>/', views.SessionsByProjectAPIView.as_view()),
     path('sessions_by_task/<int:pk>/', views.SessionsByTaskAPIView.as_view()),
+    path('sessions_by_project_for_period/<int:pk>', views.SessionsByProjectForThePeriodAPIView.as_view()),
+    path('sessions_by_task_for_period/<int:pk>', views.SessionsByTaskForPeriodAPIView.as_view()),
 ]

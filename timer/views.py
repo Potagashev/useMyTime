@@ -141,7 +141,24 @@ class SessionsByProjectAPIView(APIView):
 
     @swagger_auto_schema(responses={200: TaskTimerSerializer(many=True)})
     def get(self, request, pk):
-        sessions = TaskTimer.objects.filter(task__project__id=pk).order_by('start_time')
+        sessions = TaskTimer.objects.filter(task__project__id=pk, task__assignee=request.user).order_by('start_time')
+        serializer = TaskTimerSerializer(sessions, many=True)
+        return Response(serializer.data)
+
+
+class SessionsByProjectForThePeriodAPIView(APIView):
+    permission_classes = [IsProjectMemberForTimer & IsAuthenticated]
+
+    @swagger_auto_schema(responses={200: TaskTimerSerializer(many=True)},
+                         operation_description='<h2>you should provide two parameters: period_begin and period_end'
+                                               ' as date in ISO format</h2>')
+    def get(self, request, pk):
+        sessions = TaskTimer.objects.filter(
+            task__project__id=pk,
+            task__assignee=self.request.user,
+            start_time__gte=self.request.query_params['period_begin'],
+            end_time__lte=self.request.query_params['period_end']
+        ).order_by('start_time')
         serializer = TaskTimerSerializer(sessions, many=True)
         return Response(serializer.data)
 
@@ -152,5 +169,20 @@ class SessionsByTaskAPIView(APIView):
     @swagger_auto_schema(responses={200: TaskTimerSerializer(many=True)})
     def get(self, request, pk):
         sessions = TaskTimer.objects.filter(task__id=pk).order_by('start_time')
+        serializer = TaskTimerSerializer(sessions, many=True)
+        return Response(serializer.data)
+
+
+class SessionsByTaskForPeriodAPIView(APIView):
+    @swagger_auto_schema(responses={200: TaskTimerSerializer(many=True)},
+                         operation_description='<h2>you should provide two parameters: period_begin and period_end'
+                                               ' as date in ISO format</h2>')
+    def get(self, request, pk):
+        sessions = TaskTimer.objects.filter(
+            task__id=pk,
+            task__assignee=self.request.user,
+            start_time__gte=self.request.query_params['period_begin'],
+            end_time__lte=self.request.query_params['period_end']
+        ).order_by('start_time')
         serializer = TaskTimerSerializer(sessions, many=True)
         return Response(serializer.data)
