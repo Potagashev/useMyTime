@@ -34,14 +34,6 @@ class EmployeesPreviewByIDsAPIView(APIView):
         return Response(serializer.data)
 
 
-# class EmployeesPreviewByIDsAPIView(generics.ListAPIView):
-#     """<h2>Request: {"users": [1, 2, 3, 4,.....]}</h2>"""
-#     serializer_class = PreviewCustomUserSerializer
-#
-#     def get_queryset(self):
-#         return User.objects.filter(id__in=self.request.data['users'])
-
-
 class MakeUserAdminAPIView(APIView):
     permission_classes = [IsAdminUser, IsAuthenticated]
 
