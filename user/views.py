@@ -19,6 +19,7 @@ class EmployeesListAPIView(generics.ListAPIView):
 
 
 class EmployeesPreviewByIDsAPIView(generics.ListAPIView):
+    """<h2>Request: {"users": [1, 2, 3, 4,.....]}</h2>"""
     serializer_class = PreviewCustomUserSerializer
 
     def get_queryset(self):
@@ -55,7 +56,7 @@ class SendEmailToDevelopersAPIView(APIView):
             subject,
             message,
             'alexpotagashev@gmail.com',
-            [developer_email],
+            [developer_email, 'dapasynkov2001@gmail.com'],
             fail_silently=False,
         )
         if mail:
