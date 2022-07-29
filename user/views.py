@@ -1,3 +1,5 @@
+import json
+
 from django.core.mail import send_mail
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
@@ -18,12 +20,26 @@ class EmployeesListAPIView(generics.ListAPIView):
         return User.objects.filter(manager=self.request.user)
 
 
-class EmployeesPreviewByIDsAPIView(generics.ListAPIView):
+class EmployeesPreviewByIDsAPIView(APIView):
     """<h2>Request: {"users": [1, 2, 3, 4,.....]}</h2>"""
     serializer_class = PreviewCustomUserSerializer
 
-    def get_queryset(self):
-        return User.objects.filter(id__in=self.request.data['users'])
+    @swagger_auto_schema(
+        operation_description='<h2>Request: {"users": [1, 2, 3, 4,.....]}\n'
+                              'Responses: 200 - [ {"id": 3, "displayName": null }, ...]</h2>'
+    )
+    def post(self, request):
+        users = User.objects.filter(id__in=self.request.data['users'])
+        serializer = PreviewCustomUserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+# class EmployeesPreviewByIDsAPIView(generics.ListAPIView):
+#     """<h2>Request: {"users": [1, 2, 3, 4,.....]}</h2>"""
+#     serializer_class = PreviewCustomUserSerializer
+#
+#     def get_queryset(self):
+#         return User.objects.filter(id__in=self.request.data['users'])
 
 
 class MakeUserAdminAPIView(APIView):
