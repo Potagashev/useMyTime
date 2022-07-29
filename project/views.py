@@ -62,20 +62,20 @@ class ProjectRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
 # список таск по проекту
 class TaskListAPIView(generics.ListAPIView):
-    """
-    <h2>filtering can be priority, name, description, project, assignee, deadline, fulfilled
-    REQUIRED REQUEST FORMAT: task/tasks_of_project/{project_id}/?filter_by={field}</h2>
-    """
+    # """
+    # <h2>filtering can be priority, name, description, project, assignee, deadline, fulfilled
+    # REQUIRED REQUEST FORMAT: task/tasks_of_project/{project_id}/?filter_by={field}</h2>
+    # """
     permission_classes = [IsProjectMemberForTasks]
     serializer_class = TaskSerializer
     lookup_field = 'project_id'
 
     def get_queryset(self):
-        param = self.request.query_params.get('filter_by')
-        if param:
-            return Task.objects.filter(project=self.kwargs.get('project_id')).order_by(param)
-        else:
-            return Task.objects.filter(project=self.kwargs.get('project_id'))
+        # param = self.request.query_params.get('filter_by')
+        # if param:
+        #     return Task.objects.filter(project=self.kwargs.get('project_id')).order_by(param)
+        # else:
+        return Task.objects.filter(project=self.kwargs.get('project_id'))
 
 
 # создание таски к проекту
