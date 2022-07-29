@@ -2,12 +2,14 @@ from datetime import datetime
 
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from project.models import Task, Project
-from timer.constants import TIMER_IS_ALREADY_ACTIVE_RESPONSE, TIMER_IS_ALREADY_INACTIVE_RESPONSE, ANONYMOUS_TASK_NAME
+from timer.constants import TIMER_IS_ALREADY_ACTIVE_RESPONSE, TIMER_IS_ALREADY_INACTIVE_RESPONSE, ANONYMOUS_TASK_NAME, \
+    PROJECT_NOT_FOUND_RESPONSE, PERMISSION_DENIED_RESPONSE
 from timer.models import TaskTimer
 from timer.permissions import IsAssigneeForTimer, IsProjectMemberForTimer
 from timer.serializers import TaskTimerSerializerForStarting, TaskTimerSerializer
@@ -15,11 +17,9 @@ from timer.utils import is_timer_active, start_timer
 
 
 class StartTaskTimerAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(request_body=TaskTimerSerializerForStarting,
-                         operation_description='you can provide parameter "task_id" to set task to timer,'
-                                               'or you can leave it null')
+    @swagger_auto_schema(operation_description='you can provide parameter "task_id" to set task to timer,'
+                                               'or you can provide "project_id" instead. so it will set timer to'
+                                               ' anonymous task')
     def post(self, request):
         """принимаем в параметре - айди таски, если есть, супер, запускаем таймер,
         если нет, то ищем параметр - айди проекта, ищем такой проект, к которому привяжем
@@ -27,27 +27,33 @@ class StartTaskTimerAPIView(APIView):
         то запускаем таймер к этой же таске, если нету такой, то создаем и запускаем"""
         task_id = self.request.query_params.get('task_id')
         if task_id:
-            start_timer(request=request, task_id=task_id)
+            if get_object_or_404(Task, pk=task_id).assignee == self.request.user:
+                start_timer(request=self.request, task_id=task_id)
+            else:
+                return PERMISSION_DENIED_RESPONSE
 
         else:
             project_id = self.request.query_params.get('project_id')
             try:
                 project = Project.objects.get(id=project_id)
             except Project.DoesNotExist:
-                return Response(data={'details': 'there no project with given id'}, status=404)
-            try:
-                anon_task = Task.objects.get(
-                    name=ANONYMOUS_TASK_NAME,
-                    project__id=project_id,
-                    assignee=self.request.user
-                )
-            except Task.DoesNotExist:
-                anon_task = Task()
-                anon_task.project = project
-                anon_task.name = ANONYMOUS_TASK_NAME
-                anon_task.assignee = self.request.user
-                anon_task.save()
-            start_timer(request=request, task_id=anon_task.id)
+                return PROJECT_NOT_FOUND_RESPONSE
+            if self.request.user in project.users.all():
+                try:
+                    anon_task = Task.objects.get(
+                        name=ANONYMOUS_TASK_NAME,
+                        project__id=project_id,
+                        assignee=self.request.user
+                    )
+                except Task.DoesNotExist:
+                    anon_task = Task()
+                    anon_task.project = project
+                    anon_task.name = ANONYMOUS_TASK_NAME
+                    anon_task.assignee = self.request.user
+                    anon_task.save()
+                start_timer(request=self.request, task_id=anon_task.id)
+            else:
+                return PERMISSION_DENIED_RESPONSE
 
 
 class StopTaskTimerAPIView(APIView):
