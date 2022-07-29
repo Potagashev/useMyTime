@@ -2,6 +2,7 @@ import json
 
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -12,19 +13,26 @@ from project.serializers import ProjectSerializer, TaskSerializer, ProjectSerial
 from project.utils import create_task, validate_data_for_project_creating
 
 
+class ProjectPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
+
+
 class ProjectListAPIView(generics.ListAPIView):
     """
     <h3>filtering can be priority, name, start_time, end_time, order, type, direction_type
     REQUIRED REQUEST FORMAT: project/projects_of_current_user/?filter_by={field}</h3>
     """
     serializer_class = ProjectSerializerWithoutDescription
+    pagination_class = ProjectPagination
 
     def get_queryset(self):
         param = self.request.query_params.get('filter_by')
         if param:
             return Project.objects.filter(users__id=self.request.user.id).order_by(param)
         else:
-            return Project.objects.filter(users__id=self.request.user.id)
+            return Project.objects.filter(users__id=self.request.user.id).order_by('id')
 
 
 class ProjectCreateViewSet(viewsets.ViewSet):
