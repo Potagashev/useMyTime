@@ -8,9 +8,11 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from project.models import Membership, Project
 from user import constants
 from user.models import User
 from user.serializers import PreviewCustomUserSerializer, CustomUserStaffSerializer
+from user.utils import send_invites
 
 
 class EmployeesListAPIView(generics.ListAPIView):
@@ -71,3 +73,25 @@ class SendEmailToDevelopersAPIView(APIView):
             return Response(status=200, data={'details': 'the email has been sent'})
         else:
             return Response(status=418, data={'details': 'something went wrong!'})
+
+
+class SendProjectInviteToEmailAPIView(APIView):
+
+    def post(self, request):
+        project_id = self.request.data['project_id']
+        users = self.request.data['users']
+        emails = []
+        for user_id in users:
+            user = User.objects.get(id=user_id)
+            membership = Membership()
+            membership.project = Project.objects.get(id=project_id)
+            membership.user = user
+            membership.is_confirmed = False
+            membership.save()
+
+            emails.append(user.email)
+        send_invites(emails)
+
+
+class AcceptInvitationAPIView(APIView):
+    pass

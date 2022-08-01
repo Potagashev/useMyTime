@@ -12,7 +12,7 @@ class Project(models.Model):
     # ]
     name = models.CharField(max_length=30, null=False)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='project_creator')
-    users = models.ManyToManyField(User, blank=True)
+    users = models.ManyToManyField(User, blank=True, through='Membership')
     description = models.CharField(max_length=300, null=True, blank=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
@@ -30,6 +30,13 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Membership(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+
+    is_confirmed = models.BooleanField(default=False)
 
 
 class Task(models.Model):
