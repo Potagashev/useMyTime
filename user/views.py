@@ -10,9 +10,10 @@ from rest_framework.views import APIView
 
 from project.models import Membership, Project
 from user import constants
+from user.constants import INVITATION_HAS_ALREADY_ACCEPTED_RESPONSE, MEMBERSHIP_NOT_FOUND, INVITATION_ACCEPTED_RESPONSE
 from user.models import User
 from user.serializers import PreviewCustomUserSerializer, CustomUserStaffSerializer
-from user.utils import send_invites
+from user.utils import send_invites, send_email_to_developers
 
 
 class EmployeesListAPIView(generics.ListAPIView):
@@ -57,26 +58,16 @@ class SendEmailToDevelopersAPIView(APIView):
                                                'Response: \n200 - {"details": "the email has been sent"}\n'
                                                '418 - {"details": "something went wrong!"}</h2>')
     def post(self, request):
-        subject = constants.SUBJECT
         message_header = f"От кого: {self.request.user.displayName}\n" \
                          f"Почта: {self.request.user.email}\n\n"
         message = message_header + self.request.data['message']
-        developer_email = constants.DEVELOPER_EMAIL
-        mail = send_mail(
-            subject,
-            message,
-            'alexpotagashev@gmail.com',
-            [developer_email, 'dapasynkov2001@gmail.com'],
-            fail_silently=False,
-        )
-        if mail:
-            return Response(status=200, data={'details': 'the email has been sent'})
-        else:
-            return Response(status=418, data={'details': 'something went wrong!'})
+        send_email_to_developers(message=message)
 
 
 class SendProjectInviteToEmailAPIView(APIView):
-
+    @swagger_auto_schema(operation_description='<h2>Request: {"project_id": 123, "users": [1, 2, 3]}\n'
+                                               'Response: \n200 - {"details": "the email has been sent"}\n'
+                                               '418 - {"details": "something went wrong!"}</h2>')
     def post(self, request):
         project_id = self.request.data['project_id']
         users = self.request.data['users']
@@ -94,4 +85,20 @@ class SendProjectInviteToEmailAPIView(APIView):
 
 
 class AcceptInvitationAPIView(APIView):
-    pass
+    @swagger_auto_schema(operation_description='<h2>Request: {"project_id": 123, "user_id": 345}\n'
+                                               'Response: \n200 - {"details": "invitation accepted"}'
+                                               '\n404 - {"details": "this user was not invited in this project"}'
+                                               '\n403 - {"details": "invintation has already accepted"}</h2>')
+    def post(self, request):
+        project_id = self.request.data['project_id']
+        user_id = self.request.data['user_id']
+        try:
+            membership = Membership.objects.get(user__id=user_id, project__id=project_id)
+        except Membership.DoesNotExist:
+            return MEMBERSHIP_NOT_FOUND
+        if membership.is_confirmed:
+            return INVITATION_HAS_ALREADY_ACCEPTED_RESPONSE
+
+        membership.is_confirmed = True
+        membership.save()
+        return INVITATION_ACCEPTED_RESPONSE
