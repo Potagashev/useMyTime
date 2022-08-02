@@ -4,11 +4,13 @@ from django.core.mail import send_mail
 from django.http import Http404
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from project.models import Membership, Project
+from timer.constants import PERMISSION_DENIED_RESPONSE
 from user import constants
 from user.constants import INVITATION_HAS_ALREADY_ACCEPTED_RESPONSE, MEMBERSHIP_NOT_FOUND, INVITATION_ACCEPTED_RESPONSE
 from user.models import User
@@ -67,18 +69,30 @@ class SendEmailToDevelopersAPIView(APIView):
 class SendProjectInviteToEmailAPIView(APIView):
     @swagger_auto_schema(operation_description='<h2>Request: {"project_id": 123, "users": [1, 2, 3]}\n'
                                                'Response: \n200 - {"details": "the email has been sent"}\n'
-                                               '418 - {"details": "something went wrong!"}</h2>')
+                                               '418 - {"details": "something went wrong!"}\n'
+                                               '404 - {"details": "You do not have permission to perform this action"}'
+                                               '</h2>')
     def post(self, request):
         project_id = self.request.data['project_id']
+
+        project = get_object_or_404(Project, pk=project_id)
+        if self.request.user not in project.users.all():
+            return PERMISSION_DENIED_RESPONSE
+
         users = self.request.data['users']
         emails = []
         for user_id in users:
             user = User.objects.get(id=user_id)
-            membership = Membership()
-            membership.project = Project.objects.get(id=project_id)
-            membership.user = user
-            membership.is_confirmed = False
-            membership.save()
+            try:
+                membership = Membership.objects.get(project__id=project_id, user=user)
+                if membership.is_confirmed:
+                    continue
+            except Membership.DoesNotExist:
+                membership = Membership()
+                membership.project = Project.objects.get(id=project_id)
+                membership.user = user
+                membership.is_confirmed = False
+                membership.save()
 
             emails.append(user.email)
         send_invites(emails)
@@ -92,6 +106,7 @@ class AcceptInvitationAPIView(APIView):
     def post(self, request):
         project_id = self.request.data['project_id']
         user_id = self.request.data['user_id']
+
         try:
             membership = Membership.objects.get(user__id=user_id, project__id=project_id)
         except Membership.DoesNotExist:
