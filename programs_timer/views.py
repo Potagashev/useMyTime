@@ -2,7 +2,6 @@ from datetime import datetime
 
 from django.http import Http404
 from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,25 +13,39 @@ from programs_timer.utils import is_program_timer_active
 
 
 class StartProgramTimerAPIView(APIView):
-    def post(self, request, pk):
-        if not Program.objects.filter(id=pk).exists():
+    def post(self, request):
+        program_id = self.request.data['program_id']
+        project_id = self.request.data['project_id']
+
+        if not Program.objects.filter(id=program_id).exists():
             raise Http404
-        if is_program_timer_active(request=request, program_id=pk):
+        if is_program_timer_active(
+                request=self.request,
+                program_id=program_id,
+                project_id=project_id
+        ):
             return PROGRAM_TIMER_IS_ALREADY_ACTIVE_RESPONSE
         else:
-            session = ProgramTimer(program__id=pk, user=request.user)
+            session = ProgramTimer(
+                program__id=program_id,
+                project__id=project_id,
+                user=self.request.user
+            )
             session.save()
             serializer = ProgramTimerSerializerForStarting(session)
             return Response(serializer.data)
 
 
 class StopProgramTimerAPIView(APIView):
-    def patch(self, request, pk):
+    def patch(self, request):
+        project_id = self.request.data['project_id']
+        program_id = self.request.data['program_id']
         try:
             session = ProgramTimer.objects.get(
                 end_time=None,
                 user=request.user,
-                program__id=pk
+                project__id=project_id,
+                program__id=program_id
             )
         except ProgramTimer.DoesNotExist:
             return PROGRAM_TIMER_IS_ALREADY_INACTIVE_RESPONSE
@@ -43,12 +56,15 @@ class StopProgramTimerAPIView(APIView):
 
 
 class ProgramTimerInfoByProgramAPIView(APIView):
-    """if timer is active, returns info about start of task, else - only status"""
-    def get(self, request, pk):
+    """if timer is active, returns info about start of program, else - only status"""
+    def get(self, request):
+        project_id = self.kwargs['project_id']
+        program_id = self.kwargs['program_id']
         try:
             session = ProgramTimer.objects.get(
                 end_time=None,
-                program__id=pk,
+                program__id=program_id,
+                project__id=project_id,
                 user=request.user
             )
         except ProgramTimer.DoesNotExist:
@@ -64,16 +80,24 @@ class ProgramsListAPIView(generics.ListAPIView):
     queryset = Program.objects.all()
 
 
-class ProgramTimerInfoByProgramForTodayAPIView(APIView):
+class ProgramTimerInfoByProgramForPeriodAPIView(APIView):
     """returns info about how much time was spent today in this program"""
 
-    def get(self, request, pk):
+    def get(self, request):
+        project_id = self.kwargs['project_id']
+        program_id = self.kwargs['program_id']
+        start = self.kwargs['start']
+        end = self.kwargs['end']
         sessions = ProgramTimer.objects.filter(
-            program__id=pk,
+            program__id=program_id,
             user=request.user,
-            start_time__gte=datetime(*datetime.now().timetuple()[:3]),  # round to date
-            end_time__lte=datetime.now()
+            project__id=project_id,
+            start_time__gte=start,  # round to date
+            end_time__lte=end
+            # start_time__gte=datetime(*datetime.now().timetuple()[:3]),  # round to date
+            # end_time__lte=datetime.now()
         ).order_by('start_time')
+
         if sessions:
             start = sessions[0].start_time
             last_session = ProgramTimer.objects.latest('start_time')
@@ -81,6 +105,6 @@ class ProgramTimerInfoByProgramForTodayAPIView(APIView):
                 result = last_session.end_time - start
             else:  # активен
                 result = datetime.now() - start  # если активен
-            return Response({'total time by project for today': result})
+            return Response({'total time by project for period': result})
         else:
-            return Response({'details': 'there are no programs you worked in today'})
+            return Response({'details': 'there are no programs you worked in this period'})
