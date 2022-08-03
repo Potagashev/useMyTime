@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.http import Http404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +14,9 @@ from programs_timer.utils import is_program_timer_active
 
 
 class StartProgramTimerAPIView(APIView):
+    @swagger_auto_schema(operation_description="<h2>You should provide 'program_id' and 'project_id' in body."
+                                               "Responses: \n403 - {'message': 'program timer is already active'}\n"
+                                               "200 - {program, user, project, start_time}</h2>")
     def post(self, request):
         program_id = self.request.data['program_id']
         project_id = self.request.data['project_id']
@@ -37,6 +41,10 @@ class StartProgramTimerAPIView(APIView):
 
 
 class StopProgramTimerAPIView(APIView):
+    @swagger_auto_schema(operation_description="<h2>You should provide 'program_id' and 'project_id' in body."
+                                               "Responses: \n403 - {'message': 'program timer is already inactive'}\n"
+                                               "200 - {program, user, project, start_time}</h2>",
+                         request_body=ProgramTimerSerializer)
     def patch(self, request):
         project_id = self.request.data['project_id']
         program_id = self.request.data['program_id']
@@ -56,7 +64,7 @@ class StopProgramTimerAPIView(APIView):
 
 
 class ProgramTimerInfoByProgramAPIView(APIView):
-    """if timer is active, returns info about start of program, else - only status"""
+    """<h2>provide 'project_id' and 'program_id' in parameters of request.</h2>"""
     def get(self, request):
         project_id = self.kwargs['project_id']
         program_id = self.kwargs['program_id']
@@ -81,8 +89,12 @@ class ProgramsListAPIView(generics.ListAPIView):
 
 
 class ProgramTimerInfoByProgramForPeriodAPIView(APIView):
-    """returns info about how much time was spent today in this program"""
-
+    """<h2>provide 'project_id', 'program_id' in parameters of request.
+     Also provide 'start' and 'end' parameters in ISO format as date or datetime!
+      Responses:
+      status=200, data={'total time by project for period': result}
+      status=404, data={'details': 'there are no programs you worked in this period'}</h2>
+      """
     def get(self, request):
         project_id = self.kwargs['project_id']
         program_id = self.kwargs['program_id']
@@ -105,6 +117,6 @@ class ProgramTimerInfoByProgramForPeriodAPIView(APIView):
                 result = last_session.end_time - start
             else:  # активен
                 result = datetime.now() - start  # если активен
-            return Response({'total time by project for period': result})
+            return Response(status=200, data={'total time by project for period': result})
         else:
-            return Response({'details': 'there are no programs you worked in this period'})
+            return Response(status=404, data={'details': 'there are no programs you worked in this period'})

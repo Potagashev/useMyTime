@@ -9,7 +9,10 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        users = validated_data.pop('users')
+        try:
+            users = validated_data.pop('users')
+        except KeyError:
+            users = []
         project = Project.objects.create(**validated_data)
         project.users.set([user.id for user in users])
         project.save()
