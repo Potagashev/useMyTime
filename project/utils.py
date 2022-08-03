@@ -4,7 +4,7 @@ import json
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
-from project.constants import MIN_PRIORITY, MAX_PRIORITY
+from project.constants import MIN_PRIORITY, MAX_PRIORITY, USER_DOES_NOT_EXIST_RESPONSE
 from project.models import Task, Project
 from user.models import User
 
@@ -16,8 +16,11 @@ def validate_members(user_id: int, members: list) -> list:
     validated_members = []
     if members:
         for member_id in members:
-            if User.objects.get(id=member_id).manager.id == user_id:
-                validated_members.append(member_id)
+            try:
+                if User.objects.get(id=member_id).manager.id == user_id:
+                    validated_members.append(member_id)
+            except User.DoesNotExist:
+                continue
 
     return validated_members
 
@@ -61,7 +64,6 @@ def validate_data_for_project_creating(request):
         members = []
     validated_members = validate_members(user_id=request.user.id, members=members)
     validated_members.append(request.user.id)
-
     data['users'] = validated_members
     data['owner'] = request.user.id
 

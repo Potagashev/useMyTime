@@ -43,11 +43,9 @@ class ProjectCreateViewSet(viewsets.ViewSet):
     )
     def create(self, request):
         data = validate_data_for_project_creating(request)
-
         serializer = ProjectSerializer(data=data)
         serializer.is_valid()
         serializer.save()
-
         return Response(serializer.data)
 
 
