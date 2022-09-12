@@ -22,6 +22,7 @@ def start_timer(request, task_id):
     if not Task.objects.filter(id=task_id).exists():
         raise Http404
     if is_timer_active(request=request):
+        print('timer is already active')
         return TIMER_IS_ALREADY_ACTIVE_RESPONSE
     else:
         session = TaskTimer(task=Task.objects.get(id=task_id))
