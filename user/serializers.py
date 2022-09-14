@@ -22,10 +22,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class PreviewCustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'displayName']
+        fields = ['id', 'first_name', 'last_name']
 
 
 class CustomUserStaffSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'displayName', 'is_staff']
+        fields = ['id', 'first_name', 'last_name', 'is_staff']
