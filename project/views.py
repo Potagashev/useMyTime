@@ -89,11 +89,12 @@ class TaskCreateAPIView(APIView):
         иначе - задача назначается ему самому"""
 
         data = json.loads(request.body)
-        project = Project.objects.get(id=data['project'])
+        project = Project.objects.get(id=data['project_id'])
         if request.user not in project.users.all():
             return Response(data={"detail": "You do not have permission to perform this action."}, status=403)
 
         task = create_task(request)
+        print(task)
         serializer = TaskSerializer(task)
         return Response(serializer.data)
 

@@ -27,7 +27,7 @@ def validate_members(user_id: int, members: list) -> list:
 
 def create_task(request) -> Task:
     data = json.loads(request.body)
-    project = Project.objects.get(id=data['project'])
+    project = Project.objects.get(id=data['project_id'])
 
     # если проект принадлежит тому, что делал запрос, то задача назначается тому,
     # кому указано
@@ -37,13 +37,16 @@ def create_task(request) -> Task:
     else:
         assignee_id = request.user.id
 
-    task = Task.objects.create(
-        name=data['name'],
-        description=data['description'],
-        project=project,
-        assignee=User.objects.get(id=assignee_id),
-        deadline=data['deadline']
-    )
+    task = Task()
+    task.project = project
+    try:
+        task.name = data['name']
+        task.description = data['description']
+        task.assignee = User.objects.get(id=assignee_id)
+        task.deadline = data['deadline']
+    except KeyError:
+        pass
+    task.save()
     return task
 
 

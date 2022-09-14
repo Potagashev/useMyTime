@@ -125,6 +125,7 @@ class TotalTimeByProjectAPIView(APIView):
     )
     def get(self, request, pk):
         sessions = TaskTimer.objects.filter(task__project__id=pk).order_by('start_time')
+        print(sessions)
         if sessions:
             start = sessions[0].start_time
             last_session = TaskTimer.objects.latest('start_time')
