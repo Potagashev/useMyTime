@@ -17,9 +17,9 @@ from timer.utils import is_timer_active, start_timer
 
 
 class StartTaskTimerAPIView(APIView):
-    # @swagger_auto_schema(operation_description='you can provide parameter "task_id" to set task to timer,'
-    #                                            'or you can provide "project_id" instead. so it will set timer to'
-    #                                            ' anonymous task')
+    @swagger_auto_schema(operation_description='you can provide parameter "task_id" to set task to timer,'
+                                               'or you can provide "project_id" instead. so it will set timer to'
+                                               ' anonymous task')
     def post(self, request):
         """принимаем в параметре - айди таски, если есть, супер, запускаем таймер,
         если нет, то ищем параметр - айди проекта, ищем такой проект, к которому привяжем
