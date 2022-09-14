@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from project.models import Task, Project
 from timer.constants import TIMER_IS_ALREADY_ACTIVE_RESPONSE, TIMER_IS_ALREADY_INACTIVE_RESPONSE, ANONYMOUS_TASK_NAME, \
-    PROJECT_NOT_FOUND_RESPONSE, PERMISSION_DENIED_RESPONSE
+    PROJECT_NOT_FOUND_RESPONSE, PERMISSION_DENIED_RESPONSE, TASK_ID_OR_PROJECT_ID_WAS_NOT_PROVIDED
 from timer.models import TaskTimer
 from timer.permissions import IsAssigneeForTimer, IsProjectMemberForTimer
 from timer.serializers import TaskTimerSerializerForStarting, TaskTimerSerializer
@@ -26,14 +26,14 @@ class StartTaskTimerAPIView(APIView):
         далее проверяем, есть ли в БД уже анонимная таска к проекту. если есть,
         то запускаем таймер к этой же таске, если нету такой, то создаем и запускаем"""
         task_id = self.request.query_params.get('task_id')
+        project_id = self.request.query_params.get('project_id')
         if task_id:
             if get_object_or_404(Task, pk=task_id).assignee == self.request.user:
                 return start_timer(request=self.request, task_id=task_id)
             else:
                 return PERMISSION_DENIED_RESPONSE
 
-        else:
-            project_id = self.request.query_params.get('project_id')
+        elif project_id:
             try:
                 project = Project.objects.get(id=project_id)
             except Project.DoesNotExist:
@@ -51,9 +51,11 @@ class StartTaskTimerAPIView(APIView):
                     anon_task.name = ANONYMOUS_TASK_NAME
                     anon_task.assignee = self.request.user
                     anon_task.save()
-                start_timer(request=self.request, task_id=anon_task.id)
+                return start_timer(request=self.request, task_id=anon_task.id)
             else:
                 return PERMISSION_DENIED_RESPONSE
+        else:
+            return TASK_ID_OR_PROJECT_ID_WAS_NOT_PROVIDED
 
 
 class StopTaskTimerAPIView(APIView):

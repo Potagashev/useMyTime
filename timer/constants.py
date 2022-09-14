@@ -9,3 +9,6 @@ ANONYMOUS_TASK_NAME = 'Anonymous Task'
 PROJECT_NOT_FOUND_RESPONSE = Response(data={'details': 'there no project with given id'}, status=404)
 
 PERMISSION_DENIED_RESPONSE = Response(data={'details': 'You do not have permission to perform this action'}, status=403)
+
+TASK_ID_OR_PROJECT_ID_WAS_NOT_PROVIDED = Response(data={'details': 'You did not provide task_id or project_id '
+                                                                   'parameter'}, status=400)
