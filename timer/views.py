@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.http import Http404
+from django.utils.timezone import utc
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -127,14 +128,13 @@ class TotalTimeByProjectAPIView(APIView):
     )
     def get(self, request, pk):
         sessions = TaskTimer.objects.filter(task__project__id=pk).order_by('start_time')
-        print(sessions)
         if sessions:
             start = sessions[0].start_time
             last_session = TaskTimer.objects.latest('start_time')
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:
-                result = datetime.now() - start  # если активен
+                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by project': result})
         else:
             return Response({'details': 'There are no tasks registered by the system!'}, status=404)
@@ -159,7 +159,7 @@ class TotalTimeByTaskAPIView(APIView):
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:
-                result = datetime.now() - start  # если активен
+                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by task': result})
         else:
             return Response({'details': 'There are no tasks registered by the system!'}, status=404)

@@ -4,11 +4,11 @@ from user import constants
 
 
 def send_invites(emails: list):
-    message = f'Привет. Ты был приглашен в проект, перейди по ссылке, чтобы принять приглашение!'
+    message = f'Привет. Вы приглашены в проект, перейдите по ссылке, чтобы принять приглашение!'
     mail = send_mail(
         constants.SUBJECT,
         message,
-        'alexpotagashev@gmail.com',
+        'usemytime@mail.npptec.ru',
         emails,
         fail_silently=False,
     )

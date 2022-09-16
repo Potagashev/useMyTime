@@ -10,6 +10,7 @@ urlpatterns = [
     path('project_properties/', include('project_properties.urls')),
     path('timer/', include('timer.urls')),
     path('program_timer/', include('programs_timer.urls')),
+    path('report/', include('report.urls')),
 
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
