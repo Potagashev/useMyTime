@@ -8,6 +8,7 @@ from timer.models import TaskTimer
 
 
 class GetReportForPeriod(APIView):
+    """<h2>Just provide start and end data in ISO format like '2022-01-01'</h2>"""
     def post(self, request):
         user = self.request.user
         try:
@@ -16,9 +17,8 @@ class GetReportForPeriod(APIView):
         except KeyError as err:
             return handle_required_fileds_were_not_provided(err.args)
 
-        start_date = datetime.strptime(start, '%Y-%m-%d').date()
-        end_date = datetime.strptime(end, '%Y-%m-%d').date()
-
+        # протестить надо, как будет работать с активным таймером. то есть когда энд тайм не указан
+        # и посмотреть, как он будет работать с анонимными тасками
         sessions = TaskTimer.objects.filter(start_time__gte=start, end_time__lte=end, task__assignee=user)
 
         total_time = sessions.latest('end_time').end_time - sessions[0].start_time
@@ -57,15 +57,3 @@ class GetReportForPeriod(APIView):
             print("alright im working on it")
 
         return Response(data=report, status=200)
-        # department
-        # FIO
-        # hours
-        # percents
-        # Б
-        # Type
-        # Order
-        # Description
-        # Hours sum
-        # Sum %
-        #     row['%'] = 100 * (row['Часы'] / get_total_time_for_period())
-        # total_time = get_total_time_for_period(start, end)
