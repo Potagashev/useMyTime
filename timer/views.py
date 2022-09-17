@@ -48,9 +48,11 @@ class StartTaskTimerAPIView(APIView):
                     )
                 except Task.DoesNotExist:
                     anon_task = Task()
+                    anon_task.description = project.description
                     anon_task.project = project
                     anon_task.name = ANONYMOUS_TASK_NAME
                     anon_task.assignee = self.request.user
+                    anon_task.deadline = project.end_date
                     anon_task.save()
                 return start_timer(request=self.request, task_id=anon_task.id)
             else:
