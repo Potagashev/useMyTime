@@ -15,4 +15,6 @@ urlpatterns = [
     path('sessions_by_task/<int:pk>/', views.SessionsByTaskAPIView.as_view()),
     path('sessions_by_project_for_period/<int:pk>', views.SessionsByProjectForThePeriodAPIView.as_view()),
     path('sessions_by_task_for_period/<int:pk>', views.SessionsByTaskForPeriodAPIView.as_view()),
+
+    # path('project_statistics_for_last_two_weeks/<int:pk>', views.ProjectStatisticsForLastTwoWeeks.as_view())
 ]

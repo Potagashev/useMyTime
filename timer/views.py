@@ -86,6 +86,8 @@ class TimerInfoByTaskAPIView(APIView):
             session = TaskTimer.objects.get(end_time=None, task__assignee=request.user)
             serializer = TaskTimerSerializerForStarting(session)
             response = serializer.data
+            project = Task.objects.get(id=response['task']).project
+            response['project'] = project.id
             response['status'] = 'active'
             return Response(response)
         except TaskTimer.DoesNotExist:
@@ -218,3 +220,12 @@ class SessionsByTaskForPeriodAPIView(APIView):
         ).order_by('start_time')
         serializer = TaskTimerSerializer(sessions, many=True)
         return Response(serializer.data)
+
+
+# class ProjectStatisticsForLastTwoWeeks(APIView):
+#     @swagger_auto_schema(operation_description='<h2>you should provide project id.'
+#                                                'Response: 200 - [3, 5, 3, 8, .....]</h2>')
+#     def get(self, request, pk):
+#         hours = []
+#         for i in range(14):
+#             hours.append()
