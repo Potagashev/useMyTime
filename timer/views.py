@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from django.http import Http404
 from django.utils.timezone import utc
@@ -70,7 +70,7 @@ class StopTaskTimerAPIView(APIView):
             session = TaskTimer.objects.get(end_time=None, task__assignee=request.user)
         except TaskTimer.DoesNotExist:
             return TIMER_IS_ALREADY_INACTIVE_RESPONSE
-        session.end_time = datetime.now().isoformat()
+        session.end_time = datetime.datetime.now().isoformat()
         session.save()
         serializer = TaskTimerSerializer(session)
         return Response(serializer.data)
@@ -106,8 +106,8 @@ class TimerInfoByProjectForTodayAPIView(APIView):
     def get(self, request, pk):
         sessions = TaskTimer.objects.filter(
             task__project__id=pk,
-            start_time__gte=datetime(*datetime.now().timetuple()[:3]),  # round to date
-            end_time__lte=datetime.now()
+            start_time__gte=datetime.datetime(*datetime.datetime.now().timetuple()[:3]),  # round to date
+            end_time__lte=datetime.datetime.now()
         ).order_by('start_time')
         if sessions:
             start = sessions[0].start_time
@@ -115,7 +115,7 @@ class TimerInfoByProjectForTodayAPIView(APIView):
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:  # активен
-                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
+                result = datetime.datetime.utcnow().replace(tzinfo=utc) - start  # если активен
 
             return Response({'total time by project for today': result})
         else:
@@ -139,7 +139,7 @@ class TotalTimeByProjectAPIView(APIView):
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:
-                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
+                result = datetime.datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by project': result})
         else:
             return Response({'details': 'There are no tasks registered by the system!'}, status=404)
@@ -164,7 +164,7 @@ class TotalTimeByTaskAPIView(APIView):
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:
-                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
+                result = datetime.datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by task': result})
         else:
             return Response({'details': 'There are no tasks registered by the system!'}, status=404)
@@ -222,10 +222,25 @@ class SessionsByTaskForPeriodAPIView(APIView):
         return Response(serializer.data)
 
 
-# class ProjectStatisticsForLastTwoWeeks(APIView):
-#     @swagger_auto_schema(operation_description='<h2>you should provide project id.'
-#                                                'Response: 200 - [3, 5, 3, 8, .....]</h2>')
-#     def get(self, request, pk):
-#         hours = []
-#         for i in range(14):
-#             hours.append()
+class ProjectStatisticsForLastTwoWeeks(APIView):
+    @swagger_auto_schema(operation_description='<h2>you should provide project id.'
+                                               'Response: 200 - [3, 5, 3, 8, .....]</h2>')
+    def get(self, request, pk):
+        if request.user in get_object_or_404(queryset=Project, pk=pk).users.all():
+            hours = []
+            for i in range(14, 0, -1):
+                day_start = (datetime.datetime.utcnow().replace(tzinfo=utc) - datetime.timedelta(days=i-1))
+                day_start = datetime.datetime(*day_start.timetuple()[:3])
+                day_end = day_start + datetime.timedelta(hours=23, minutes=59, seconds=59, microseconds=999999)
+                sessions = TaskTimer.objects.filter(
+                    start_time__gte=day_start,
+                    end_time__lte=day_end,
+                    task__project__id=pk,
+                )
+                day_hours = 0
+                for session in sessions:
+                    day_hours += ((session.end_time - session.start_time).seconds / 3600)
+                hours.append(day_hours)
+            return Response(hours)
+        else:
+            return PERMISSION_DENIED_RESPONSE
