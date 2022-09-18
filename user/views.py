@@ -31,7 +31,7 @@ class EmployeesPreviewByIDsAPIView(APIView):
 
     @swagger_auto_schema(
         operation_description='<h2>Request: {"users": [1, 2, 3, 4,.....]}\n'
-                              'Responses: 200 - [ {"id": 3, "displayName": null }, ...]</h2>'
+                              'Responses: 200 - [ {"id": 3, "first_name": null }, ...]</h2>'
     )
     def post(self, request):
         users = User.objects.filter(id__in=self.request.data['users'])

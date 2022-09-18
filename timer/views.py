@@ -113,7 +113,8 @@ class TimerInfoByProjectForTodayAPIView(APIView):
             if last_session.end_time is not None:  # если неактивен
                 result = last_session.end_time - start
             else:  # активен
-                result = datetime.now() - start  # если активен
+                result = datetime.utcnow().replace(tzinfo=utc) - start  # если активен
+
             return Response({'total time by project for today': result})
         else:
             return Response({'details': 'there are no tasks you worked at this project today'})
