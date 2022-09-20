@@ -142,7 +142,7 @@ class TotalTimeByProjectAPIView(APIView):
                 result = datetime.datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by project': result})
         else:
-            return Response({'details': 'There are no tasks registered by the system!'}, status=404)
+            return Response({'total time by project': 0})
 
 
 class TotalTimeByTaskAPIView(APIView):
@@ -168,6 +168,10 @@ class TotalTimeByTaskAPIView(APIView):
             return Response({'total time by task': result})
         else:
             return Response({'details': 'There are no tasks registered by the system!'}, status=404)
+
+
+class TotalTimeByTaskForTodayAPIView(APIView):
+    pass
 
 
 class SessionsByProjectAPIView(APIView):

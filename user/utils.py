@@ -22,7 +22,7 @@ def send_email_to_developers(message: str):
     mail = send_mail(
         constants.SUBJECT,
         message,
-        'alexpotagashev@gmail.com',
+        'usemytime@mail.npptec.ru',
         [constants.DEVELOPER_EMAIL],
         fail_silently=False,
     )

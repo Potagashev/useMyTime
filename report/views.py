@@ -20,8 +20,6 @@ class GetReportForPeriod(APIView):
         start_date = datetime.datetime.strptime(start, '%Y-%m-%d')
         end_date = datetime.datetime.strptime(end, '%Y-%m-%d') + datetime.timedelta(hours=23, minutes=59, seconds=59, microseconds=999999)
 
-        # протестить надо, как будет работать с активным таймером. то есть когда энд тайм не указан
-        # и посмотреть, как он будет работать с анонимными тасками
         sessions = TaskTimer.objects.filter(start_time__gte=start_date, end_time__lte=end_date, task__assignee=user)
         if sessions:
             total_time = sessions.latest('end_time').end_time - sessions[0].start_time
