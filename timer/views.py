@@ -167,11 +167,19 @@ class TotalTimeByTaskAPIView(APIView):
                 result = datetime.datetime.utcnow().replace(tzinfo=utc) - start  # если активен
             return Response({'total time by task': result})
         else:
-            return Response({'details': 'There are no tasks registered by the system!'}, status=404)
+            return Response({'total time by task': 0})
 
 
 class TotalTimeByTaskForTodayAPIView(APIView):
-    pass
+    def get(self, request):
+        start_today = datetime.datetime.today()
+        end_today = start_today + datetime.timedelta(hours=23, minutes=59, seconds=59, microseconds=999999)
+        tasks = Task.objects.filter(assignee=request.user)
+        sessions = TaskTimer.objects.filter(start_time__gte=start_today, end_time__lte=end_today, task__in=tasks)
+        total_time = 0
+        for session in sessions:
+            total_time += (session.end_time - session.start_time).seconds
+        return Response({'total time by all tasks for today in seconds': total_time})
 
 
 class SessionsByProjectAPIView(APIView):
