@@ -11,6 +11,7 @@ urlpatterns = [
     path('user/make_user_admin/<int:pk>/', views.MakeUserAdminAPIView.as_view()),
     path('email/send_email_to_developers/', views.SendEmailToDevelopersAPIView.as_view()),
 
+    # path('email/send_invite_by_link/', views.SendProjectInviteByLinkAPIView.as_view()),
     path('email/send_invite_to_email/', views.SendProjectInviteToEmailAPIView.as_view()),
     path('email/accept_the_invitation/', views.AcceptInvitationAPIView.as_view()),
 

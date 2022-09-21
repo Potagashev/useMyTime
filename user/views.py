@@ -66,6 +66,14 @@ class SendEmailToDevelopersAPIView(APIView):
         send_email_to_developers(message=message)
 
 
+# class InviteToProjectWithLinkAPIView(APIView):
+#     def post(self, request):
+#         user = self.request.user
+#         project_id = self.request.data['project_id']
+#         project = Project.objects.get(id=project_id)
+#         project.users.add()
+
+
 class SendProjectInviteToEmailAPIView(APIView):
     @swagger_auto_schema(operation_description='<h2>Request: {"project_id": 123, "users": [1, 2, 3]}\n'
                                                'Response: \n200 - {"details": "the email has been sent"}\n'

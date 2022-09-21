@@ -39,8 +39,8 @@ class GetReportForPeriod(APIView):
                     employee = task.assignee.displayName
                     hours = (session.end_time - session.start_time).seconds / 3600
                     percents = 100 * hours / (total_time.seconds / 3600)
-                    direction_type = task.project.direction_type
-                    project_type = task.project.type
+                    direction_type = task.project.direction_type.abbreviation
+                    project_type = task.project.type.abbreviation
                     order = task.project.order
                     description = task.description
 
